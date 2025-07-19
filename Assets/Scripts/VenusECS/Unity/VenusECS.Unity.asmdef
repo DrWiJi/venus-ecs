@@ -1,0 +1,16 @@
+{
+    "name": "VenusECS.Unity",
+    "rootNamespace": "",
+    "references": [
+        "GUID:0247e93e768e6d64b8609ec1afbb8f8f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
