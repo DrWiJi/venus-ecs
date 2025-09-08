@@ -29,7 +29,6 @@ namespace VenusECS.Core
             {
                 var newEntity = new VenusEntity();
                 newEntity.Id = _entitiesCounter++;
-                newEntity.Generation = 0;
                 _freeEntities.Enqueue(newEntity);
                 _usedPools.Add(newEntity, new HashSet<IVenusPool>(_pools.Count));
             }
@@ -49,7 +48,7 @@ namespace VenusECS.Core
         {
             if (_freeEntities.Count == 0)
             {
-                var entity = new VenusEntity {Id = _entitiesCounter++, Generation = 0};
+                var entity = new VenusEntity {Id = _entitiesCounter++};
                 _entities.Add(entity);
                 _usedPools.Add(entity, new HashSet<IVenusPool>(64));
                 return entity;
@@ -76,7 +75,6 @@ namespace VenusECS.Core
             for (int i = 0; i < _entities.Count; i++)
             {
                 var newEntity = entitiesList[i];
-                newEntity.Generation = 0;
 
                 _freeEntities.Enqueue(newEntity);
                 DelEntityFromAllPools(newEntity);

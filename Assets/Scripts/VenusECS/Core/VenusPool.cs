@@ -73,7 +73,7 @@ namespace VenusECS.Core.Pool
         public ref T1 Get<T1>(VenusEntity entity) where T1 : struct, IVenusComponent
         {
 #if SAFETY_CHECKS
-            if (!Has<T1>(entity)) throw new ArgumentException($"Component on entity doesn't exists. Entity Id {entity.Id} Gen {entity.Generation}");
+            if (!Has<T1>(entity)) throw new ArgumentException($"Component on entity doesn't exists. Entity Id {entity.Id}");
 #endif        
             return ref UnsafeUtility.As<T, T1>(ref _components[entity.Id - _minEntityId]);
         }
@@ -81,7 +81,7 @@ namespace VenusECS.Core.Pool
         public ref T1 Add<T1>(VenusEntity entity) where T1 : struct, IVenusComponent
         {
 #if SAFETY_CHECKS
-            if (Has<T1>(entity)) throw new ArgumentException($"Component of type already exists. Entity Id {entity.Id} Gen {entity.Generation}");
+            if (Has<T1>(entity)) throw new ArgumentException($"Component of type already exists. Entity Id {entity.Id}");
 #endif
             EnsureCapacity(entity.Id);
             int bitmaskIndex = GetBitmaskIndex(entity.Id);
@@ -95,7 +95,7 @@ namespace VenusECS.Core.Pool
         public void Remove(VenusEntity entity)
         {
 #if SAFETY_CHECKS
-            if (!HasTyped(entity)) throw new ArgumentException($"Component on entity doesn't exists. Entity Id {entity.Id} Gen {entity.Generation}");
+            if (!HasTyped(entity)) throw new ArgumentException($"Component on entity doesn't exists. Entity Id {entity.Id}");
 #endif        
             int bitmaskIndex = GetBitmaskIndex(entity.Id);
             int bitPosition = GetBitPosition(entity.Id);

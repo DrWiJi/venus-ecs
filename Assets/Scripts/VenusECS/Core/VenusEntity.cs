@@ -5,16 +5,15 @@ namespace VenusECS.Core
     public struct VenusEntity : IEquatable<VenusEntity>
     {
         public int Id;
-        public int Generation;
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id, Generation);
+            return HashCode.Combine(Id);
         }
 
         public bool Equals(VenusEntity other)
         {
-            return Id == other.Id && Generation == other.Generation;
+            return Id == other.Id;
         }
 
         public override bool Equals(object obj)
