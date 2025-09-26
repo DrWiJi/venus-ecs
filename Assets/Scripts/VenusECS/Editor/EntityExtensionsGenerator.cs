@@ -86,6 +86,14 @@ namespace VenusECS.Extensions
             pool.SetTyped(entity, component);
         }}";
 
+        // All secondary pools are read only, so we don't need to add set method
+        private static string _GetSecondaryMethodTemplate =
+            $@"        public static {_componentTypeTarget} GetSecondary{_componentTypeTarget}(this VenusEntity entity, int index)
+        {{
+            var pool = ((VenusPools)Venus.SecondaryPools[index]).{_componentTypeTarget}Pool;
+            return pool.GetTyped(entity);
+        }}";
+
         private static string _generationTargetDirectory = "Assets/Scripts/VenusECS/Unity/Extensions/Generated";
         private static string _generationTargetFile = "VenusEntityExtensions.Methods.cs";
         private static string _stringEnd = "\r\n\r\n";

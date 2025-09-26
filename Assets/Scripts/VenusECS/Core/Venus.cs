@@ -13,7 +13,7 @@ namespace VenusECS.Core
 
         public static IVenusPools Pools => _pools;
         
-        public static List<IVenusPools> SecondaryPools = new();
+        public static readonly List<IVenusPools> SecondaryPools = new();
 
         static Venus()
         {
@@ -37,9 +37,10 @@ namespace VenusECS.Core
             _poolsFactory = factory;
         }
 
-        public static void CreateSecondaryPools()
+        public static IVenusPools CreateSecondaryPools()
         {
             SecondaryPools.Add(_poolsFactory.Create());
+            return SecondaryPools[SecondaryPools.Count - 1];
         }
 
         public static void Reset()

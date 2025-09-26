@@ -56,7 +56,6 @@ namespace VenusECS.Extensions
         public static void SetActorReference(this VenusEntity entity, ActorReference component)
         {
             var pool = ((VenusPools)Venus.Pools).ActorReferencePool;
-
             pool.SetTyped(entity, component);
         }
 
@@ -106,9 +105,7 @@ namespace VenusECS.Extensions
         public static void SetEmptyComponent(this VenusEntity entity, EmptyComponent component)
         {
             var pool = ((VenusPools)Venus.Pools).EmptyComponentPool;
-
             pool.SetTyped(entity, component);
-
         }
 
         public static OtherTestComponent AddOtherTestComponent(this VenusEntity entity)
@@ -157,9 +154,7 @@ namespace VenusECS.Extensions
         public static void SetOtherTestComponent(this VenusEntity entity, OtherTestComponent component)
         {
             var pool = ((VenusPools)Venus.Pools).OtherTestComponentPool;
-
             pool.SetTyped(entity, component);
-
         }
 
         public static PositionComponent AddPositionComponent(this VenusEntity entity)
@@ -208,9 +203,7 @@ namespace VenusECS.Extensions
         public static void SetPositionComponent(this VenusEntity entity, PositionComponent component)
         {
             var pool = ((VenusPools)Venus.Pools).PositionComponentPool;
-
             pool.SetTyped(entity, component);
-
         }
 
         public static SpawnedEntityComponent AddSpawnedEntityComponent(this VenusEntity entity)
@@ -259,7 +252,6 @@ namespace VenusECS.Extensions
         public static void SetSpawnedEntityComponent(this VenusEntity entity, SpawnedEntityComponent component)
         {
             var pool = ((VenusPools)Venus.Pools).SpawnedEntityComponentPool;
-
             pool.SetTyped(entity, component);
         }
 
@@ -309,7 +301,6 @@ namespace VenusECS.Extensions
         public static void SetTagComponent(this VenusEntity entity, TagComponent component)
         {
             var pool = ((VenusPools)Venus.Pools).TagComponentPool;
-
             pool.SetTyped(entity, component);
         }
 
@@ -360,7 +351,6 @@ namespace VenusECS.Extensions
         {
             var pool = ((VenusPools)Venus.Pools).TestComponentPool;
             pool.SetTyped(entity, component);
-
         }
 
         public static VenusEntityComponent AddVenusEntityComponent(this VenusEntity entity)
@@ -411,5 +401,7 @@ namespace VenusECS.Extensions
             var pool = ((VenusPools)Venus.Pools).VenusEntityComponentPool;
             pool.SetTyped(entity, component);
         }
+
+
     }
 }

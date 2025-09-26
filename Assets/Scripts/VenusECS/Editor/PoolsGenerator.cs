@@ -14,6 +14,7 @@ namespace VenusECS.CodeGeneration
         private static string _poolNameTarget = "^poolName^";
         private static string _poolCreationTarget = "^pool^";
         private static string _poolAddTarget = "^poolAdd^";
+        private static string _poolIndexTarget = "^poolIndex^";
         private static string _additionalNamespacesTarget = "^additionalNamespace^";
 
         private static string _poolsCodeTemplate = $@"//Generated automatically, dont touch with hands!
@@ -42,6 +43,9 @@ namespace VenusECS.Unity
 
         private static string _poolAddTemplate =
             $@"            _pools.Add(typeof({_componentTypeTarget}), {_poolNameTarget})";
+
+        private static string _poolIndexTemplate =
+            $@"            {_poolNameTarget}.PoolIndex = {_poolIndexTarget}";
 
         private static string _generationTargetDirectory = "Assets/Scripts/VenusECS/Unity/Generated/Pools";
         private static string _generationTargetFile = "VenusPools.Generated.cs";
@@ -87,12 +91,15 @@ namespace VenusECS.Unity
 
             var componentsDefinitions = new StringBuilder();
             var componentsInstantiations = new StringBuilder();
-            foreach (var componentType in componentsNamesList)
+            for (int i = 0; i < componentsNamesList.Count; i++)
             {
+                var componentType = componentsNamesList[i];
                 var poolName = componentType + "Pool";
                 componentsDefinitions.Append(_poolFieldTemplate.Replace(_componentTypeTarget, componentType).Replace(_poolNameTarget, poolName));
                 componentsDefinitions.Append(_stringEnd);
                 componentsInstantiations.Append(_poolAddTemplate.Replace(_componentTypeTarget, componentType).Replace(_poolNameTarget, poolName));
+                componentsInstantiations.Append(_stringEnd);
+                componentsInstantiations.Append(_poolIndexTemplate.Replace(_componentTypeTarget, componentType).Replace(_poolNameTarget, poolName).Replace(_poolIndexTarget, i.ToString()));
                 componentsInstantiations.Append(_stringEnd);
             }
 

@@ -8,13 +8,16 @@ namespace VenusECS.Core.Pool
     public class VenusPool<T> : IVenusPool
         where T : struct, IVenusComponent
     {
+        private const int SnapshotVersion = 1;
         private int _poolSizePowerOfTwo = 10;
         private int _bitsPerInt = 32;
         private int[] _bitmask;
         private T[] _components;
+        private Type _type;
         private int _minEntityId = int.MaxValue;
         private int _maxEntityId = int.MinValue;
         private int _capacity;
+        private int _poolIndex;
 
         public int[] Bitmask => _bitmask;
         public int MinEntityId => _minEntityId;
@@ -24,7 +27,7 @@ namespace VenusECS.Core.Pool
 
         public event Action<IVenusPool, VenusEntity> OnEntityAdded;
         public event Action<IVenusPool, VenusEntity> OnEntityRemoved;
-        public event Action<IVenusPool, VenusEntity, T> OnComponentChaged;
+        public event Action<IVenusPool, VenusEntity, IVenusComponent> OnComponentChanged;
 
         public VenusPool()
         {
@@ -44,6 +47,7 @@ namespace VenusECS.Core.Pool
             _capacity = size;
             _bitmask = new int[size / _bitsPerInt];
             _components = new T[size];
+            _type = typeof(T);
         }
 
         private void EnsureCapacity(int entityId)
@@ -91,7 +95,7 @@ namespace VenusECS.Core.Pool
             int index = entity.Id - _minEntityId;
             _components[index] = new T();
             OnEntityAdded?.Invoke(this, entity);
-            OnComponentChaged?.Invoke(this, entity, _components[index]);
+            OnComponentChanged?.Invoke(this, entity, _components[index]);
             return UnsafeUtility.As<T, T1>(ref _components[index]);
         }
 
@@ -128,6 +132,9 @@ namespace VenusECS.Core.Pool
 
         public T AddTyped(VenusEntity entity)
         {
+#if SAFETY_CHECKS
+            if (HasTyped(entity)) throw new ArgumentException($"Component of type already exists. Entity Id {entity.Id}");
+#endif
             EnsureCapacity(entity.Id);
             int bitmaskIndex = GetBitmaskIndex(entity.Id);
             int bitPosition = GetBitPosition(entity.Id);
@@ -139,6 +146,9 @@ namespace VenusECS.Core.Pool
 
         public void RemoveTyped(VenusEntity entity)
         {
+#if SAFETY_CHECKS
+            if (!HasTyped(entity)) throw new ArgumentException($"Component on entity doesn't exists. Entity Id {entity.Id}");
+#endif
             int bitmaskIndex = GetBitmaskIndex(entity.Id);
             int bitPosition = GetBitPosition(entity.Id);
             _bitmask[bitmaskIndex] &= ~(1 << bitPosition);
@@ -159,7 +169,7 @@ namespace VenusECS.Core.Pool
             if (!HasTyped(entity)) throw new ArgumentException($"Component on entity doesn't exists. Entity Id {entity.Id}. Pool {typeof(T).Name}");
 #endif
             _components[entity.Id - _minEntityId] = value;
-            OnComponentChaged?.Invoke(this, entity, _components[entity.Id - _minEntityId]);
+            OnComponentChanged?.Invoke(this, entity, _components[entity.Id - _minEntityId]);
         }
 
         public IEnumerable<VenusEntity> GetAllEntities()
@@ -189,7 +199,219 @@ namespace VenusECS.Core.Pool
             var oldValue = _components[index];
             if (oldValue.Equals(value)) return;
             _components[index] = UnsafeUtility.As<T1, T>(ref value);
-            OnComponentChaged?.Invoke(this, entity, _components[index]);
+            OnComponentChanged?.Invoke(this, entity, _components[index]);
+        }
+
+        public Type GetComponentType()
+        {
+            return _type;
+        }
+
+        public unsafe void* GetPointer(VenusEntity entity)
+        {
+#if SAFETY_CHECKS
+            if (!HasTyped(entity)) throw new ArgumentException($"Component on entity doesn't exists. Entity Id {entity.Id}. Pool {typeof(T).Name}");
+#endif
+            return UnsafeUtility.AddressOf(ref _components[entity.Id - _minEntityId]);
+        }
+
+        public int GetPoolIndex()
+        {
+            return _poolIndex;
+        }
+
+        public unsafe void SetRaw(VenusEntity entity, byte* dataPtr)
+        {
+#if SAFETY_CHECKS
+            if (!HasTyped(entity)) throw new ArgumentException($"Component on entity doesn't exists. Entity Id {entity.Id}. Pool {typeof(T).Name}");
+#endif
+            unsafe
+            {
+                UnsafeUtility.MemCpy(UnsafeUtility.AddressOf(ref _components[entity.Id - _minEntityId]), dataPtr, UnsafeUtility.SizeOf(typeof(T)));
+            }
+        }
+
+        public unsafe void AddRaw(VenusEntity entity, byte* dataPtr)
+        {
+#if SAFETY_CHECKS
+            if (HasTyped(entity)) throw new ArgumentException($"Component of type already exists. Entity Id {entity.Id}");
+#endif
+            unsafe
+            {
+                UnsafeUtility.MemCpy(UnsafeUtility.AddressOf(ref _components[entity.Id - _minEntityId]), dataPtr, UnsafeUtility.SizeOf(typeof(T)));
+            }
+        }
+
+        public byte[] GetSnapshot()
+        {
+            // Header layout (int32 each):
+            // [0] version
+            // [1] bitsPerInt
+            // [2] minEntityId
+            // [3] maxEntityId
+            // [4] capacity (components length)
+            // [5] poolIndex
+            // [6] bitmaskLength (number of ints)
+            // [7] componentsLength (number of T items)
+            // [8] componentSize (bytes)
+            int bitmaskLength = _bitmask?.Length ?? 0;
+            int componentsLength = _components?.Length ?? 0;
+            int componentSize = UnsafeUtility.SizeOf(typeof(T));
+
+            const int headerInts = 9;
+            int headerBytes = headerInts * sizeof(int);
+            int bitmaskBytes = bitmaskLength * sizeof(int);
+            int componentsBytes = componentsLength * componentSize;
+            int totalSize = headerBytes + bitmaskBytes + componentsBytes;
+
+            var snapshot = new byte[totalSize];
+
+            // Write header
+            int[] header = new int[headerInts]
+            {
+                SnapshotVersion,
+                _bitsPerInt,
+                _minEntityId,
+                _maxEntityId,
+                _capacity,
+                _poolIndex,
+                bitmaskLength,
+                componentsLength,
+                componentSize
+            };
+            Buffer.BlockCopy(header, 0, snapshot, 0, headerBytes);
+
+            int offset = headerBytes;
+
+            // Write bitmask
+            if (bitmaskLength > 0)
+            {
+                unsafe
+                {
+                    fixed (byte* dst = &snapshot[offset])
+                    {
+                        void* src = UnsafeUtility.AddressOf(ref _bitmask[0]);
+                        UnsafeUtility.MemCpy(dst, src, bitmaskBytes);
+                    }
+                }
+                offset += bitmaskBytes;
+            }
+
+            // Write components
+            if (componentsLength > 0)
+            {
+                unsafe
+                {
+                    fixed (byte* dst = &snapshot[offset])
+                    {
+                        void* src = UnsafeUtility.AddressOf(ref _components[0]);
+                        UnsafeUtility.MemCpy(dst, src, componentsBytes);
+                    }
+                }
+            }
+
+            return snapshot;
+        }
+
+        public void RestoreSnapshot(byte[] snapshot)
+        {
+            if (snapshot == null || snapshot.Length == 0) return;
+
+            const int headerInts = 9;
+            int headerBytes = headerInts * sizeof(int);
+            if (snapshot.Length < headerBytes) throw new ArgumentException("Snapshot is too small");
+
+            int[] header = new int[headerInts];
+            Buffer.BlockCopy(snapshot, 0, header, 0, headerBytes);
+
+            int version = header[0];
+            int bitsPerInt = header[1];
+            int minEntityId = header[2];
+            int maxEntityId = header[3];
+            int capacity = header[4];
+            int poolIndex = header[5];
+            int bitmaskLength = header[6];
+            int componentsLength = header[7];
+            int componentSize = header[8];
+
+            if (version != SnapshotVersion)
+            {
+                throw new ArgumentException($"Unsupported snapshot version: {version}");
+            }
+
+            if (bitsPerInt != _bitsPerInt)
+            {
+                // We can still restore, but this pool expects specific bitsPerInt; mismatch indicates incompatible runtime
+                throw new ArgumentException("Snapshot bitsPerInt mismatch");
+            }
+
+            if (componentSize != UnsafeUtility.SizeOf(typeof(T)))
+            {
+                throw new ArgumentException("Snapshot component size mismatch");
+            }
+
+            int bitmaskBytes = bitmaskLength * sizeof(int);
+            int componentsBytes = componentsLength * componentSize;
+            int required = headerBytes + bitmaskBytes + componentsBytes;
+            if (snapshot.Length < required) throw new ArgumentException("Snapshot data truncated");
+
+            _minEntityId = minEntityId;
+            _maxEntityId = maxEntityId;
+            _capacity = capacity;
+            _poolIndex = poolIndex;
+
+            if (bitmaskLength > 0)
+            {
+                if (_bitmask == null || _bitmask.Length != bitmaskLength)
+                {
+                    _bitmask = new int[bitmaskLength];
+                }
+            }
+            else
+            {
+                _bitmask = Array.Empty<int>();
+            }
+
+            if (componentsLength > 0)
+            {
+                if (_components == null || _components.Length != componentsLength)
+                {
+                    _components = new T[componentsLength];
+                }
+            }
+            else
+            {
+                _components = Array.Empty<T>();
+            }
+
+            int offset = headerBytes;
+
+            // Read bitmask
+            if (bitmaskLength > 0)
+            {
+                unsafe
+                {
+                    fixed (byte* src = &snapshot[offset])
+                    {
+                        void* dst = UnsafeUtility.AddressOf(ref _bitmask[0]);
+                        UnsafeUtility.MemCpy(dst, src, bitmaskBytes);
+                    }
+                }
+                offset += bitmaskBytes;
+            }
+
+            // Read components
+            if (componentsLength > 0)
+            {
+                unsafe
+                {
+                    fixed (byte* src = &snapshot[offset])
+                    {
+                        void* dst = UnsafeUtility.AddressOf(ref _components[0]);
+                        UnsafeUtility.MemCpy(dst, src, componentsBytes);
+                    }
+                }
+            }
         }
     }
 }
