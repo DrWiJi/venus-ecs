@@ -14,7 +14,7 @@ public partial class SimplePoolTests
         for (int i = 0; i < 2; i++)
         {
             var entity = Venus.Pools.CreateEntity();
-            ref var testComponent = ref entity.Add<TestComponent>();
+            var testComponent = entity.Add<TestComponent>();
             testComponent.SomeData = 100 + i;
             entitiesList.Add(entity);
         }
@@ -34,9 +34,9 @@ public partial class SimplePoolTests
         for (int i = 0; i < 20; i++)
         {
             var entity = Venus.Pools.CreateEntity();
-            ref var testComponent = ref entity.Add<TestComponent>();
+            var testComponent = entity.Add<TestComponent>();
             testComponent.SomeData = 100 + i;
-            ref var otherTestComponent = ref entity.Add<OtherTestComponent>();
+            var otherTestComponent = entity.Add<OtherTestComponent>();
             otherTestComponent.OtherData = 1000 + i;
             entitiesList.Add(entity);
         }
@@ -58,9 +58,9 @@ public partial class SimplePoolTests
         for (int i = 0; i < 20000; i++)
         {
             var entity = Venus.Pools.CreateEntity();
-            ref var testComponent = ref entity.Add<TestComponent>();
+            var testComponent = entity.Add<TestComponent>();
             testComponent.SomeData = 100000 + i;
-            ref var otherTestComponent = ref entity.Add<OtherTestComponent>();
+            var otherTestComponent = entity.Add<OtherTestComponent>();
             otherTestComponent.OtherData = 1000000 + i;
             entitiesList.Add(entity);
         }
@@ -82,7 +82,7 @@ public partial class SimplePoolTests
         for (int i = 0; i < 2; i++)
         {
             var entity = Venus.Pools.CreateEntity();
-            ref var testComponent = ref entity.Add<TestComponent>();
+            var testComponent = entity.Add<TestComponent>();
             testComponent.SomeData = 100 + i;
             entitiesList.Add(entity);
         }
@@ -95,7 +95,7 @@ public partial class SimplePoolTests
         for (int i = 0; i < 2; i++)
         {
             var entity = Venus.Pools.CreateEntity();
-            ref var testComponent = ref entity.Add<TestComponent>();
+            var testComponent = entity.Add<TestComponent>();
             testComponent.SomeData = 100 + i;
             entitiesList.Add(entity);
         }
@@ -115,7 +115,7 @@ public partial class SimplePoolTests
         for (int i = 0; i < 2; i++)
         {
             var entity = Venus.Pools.CreateEntity();
-            ref var testComponent = ref entity.Add<TestComponent>();
+            var testComponent = entity.Add<TestComponent>();
             testComponent.SomeData = 100 + i;
             entitiesList.Add(entity);
         }
@@ -128,7 +128,7 @@ public partial class SimplePoolTests
         for (int i = 0; i < 2; i++)
         {
             Assert.That(!entitiesList[i].Has<TestComponent>());
-            ref var testComponent = ref entitiesList[i].Add<TestComponent>();
+            var testComponent = entitiesList[i].Add<TestComponent>();
             testComponent.SomeData = 10000 + i;
         }
         

@@ -24,6 +24,7 @@ namespace VenusECS.Core.Pool
 
         public event Action<IVenusPool, VenusEntity> OnEntityAdded;
         public event Action<IVenusPool, VenusEntity> OnEntityRemoved;
+        public event Action<IVenusPool, VenusEntity, T> OnComponentChaged;
 
         public VenusPool()
         {
@@ -70,15 +71,15 @@ namespace VenusECS.Core.Pool
             return (entityId - _minEntityId) % _bitsPerInt;
         }
 
-        public ref T1 Get<T1>(VenusEntity entity) where T1 : struct, IVenusComponent
+        public T1 Get<T1>(VenusEntity entity) where T1 : struct, IVenusComponent
         {
 #if SAFETY_CHECKS
             if (!Has<T1>(entity)) throw new ArgumentException($"Component on entity doesn't exists. Entity Id {entity.Id}");
 #endif        
-            return ref UnsafeUtility.As<T, T1>(ref _components[entity.Id - _minEntityId]);
+            return UnsafeUtility.As<T, T1>(ref _components[entity.Id - _minEntityId]);
         }
 
-        public ref T1 Add<T1>(VenusEntity entity) where T1 : struct, IVenusComponent
+        public T1 Add<T1>(VenusEntity entity) where T1 : struct, IVenusComponent
         {
 #if SAFETY_CHECKS
             if (Has<T1>(entity)) throw new ArgumentException($"Component of type already exists. Entity Id {entity.Id}");
@@ -87,9 +88,11 @@ namespace VenusECS.Core.Pool
             int bitmaskIndex = GetBitmaskIndex(entity.Id);
             int bitPosition = GetBitPosition(entity.Id);
             _bitmask[bitmaskIndex] |= (1 << bitPosition);
-            _components[entity.Id - _minEntityId] = new T();
+            int index = entity.Id - _minEntityId;
+            _components[index] = new T();
             OnEntityAdded?.Invoke(this, entity);
-            return ref UnsafeUtility.As<T, T1>(ref _components[entity.Id - _minEntityId]);
+            OnComponentChaged?.Invoke(this, entity, _components[index]);
+            return UnsafeUtility.As<T, T1>(ref _components[index]);
         }
 
         public void Remove(VenusEntity entity)
@@ -118,12 +121,12 @@ namespace VenusECS.Core.Pool
             _maxEntityId = int.MinValue;
         }
 
-        public ref T GetTyped(VenusEntity entity)
+        public T GetTyped(VenusEntity entity)
         {
-            return ref _components[entity.Id - _minEntityId];
+            return _components[entity.Id - _minEntityId];
         }
 
-        public ref T AddTyped(VenusEntity entity)
+        public T AddTyped(VenusEntity entity)
         {
             EnsureCapacity(entity.Id);
             int bitmaskIndex = GetBitmaskIndex(entity.Id);
@@ -131,7 +134,7 @@ namespace VenusECS.Core.Pool
             _bitmask[bitmaskIndex] |= (1 << bitPosition);
             _components[entity.Id - _minEntityId] = new T();
             OnEntityAdded?.Invoke(this, entity);
-            return ref _components[entity.Id - _minEntityId];
+            return _components[entity.Id - _minEntityId];
         }
 
         public void RemoveTyped(VenusEntity entity)
@@ -150,6 +153,15 @@ namespace VenusECS.Core.Pool
             return (_bitmask[bitmaskIndex] & (1 << bitPosition)) != 0;
         }
 
+        public void SetTyped(VenusEntity entity, T value)
+        {
+#if SAFETY_CHECKS
+            if (!HasTyped(entity)) throw new ArgumentException($"Component on entity doesn't exists. Entity Id {entity.Id}. Pool {typeof(T).Name}");
+#endif
+            _components[entity.Id - _minEntityId] = value;
+            OnComponentChaged?.Invoke(this, entity, _components[entity.Id - _minEntityId]);
+        }
+
         public IEnumerable<VenusEntity> GetAllEntities()
         {
             for (int i = 0; i < _bitmask.Length; i++)
@@ -166,6 +178,18 @@ namespace VenusECS.Core.Pool
                     }
                 }
             }
+        }
+
+        public void Set<T1>(VenusEntity entity, T1 value) where T1 : struct, IVenusComponent
+        {
+#if SAFETY_CHECKS
+            if (!Has<T1>(entity)) throw new ArgumentException($"Component on entity doesn't exists. Entity Id {entity.Id}. Pool {typeof(T).Name}");
+#endif
+            var index = entity.Id - _minEntityId;
+            var oldValue = _components[index];
+            if (oldValue.Equals(value)) return;
+            _components[index] = UnsafeUtility.As<T1, T>(ref value);
+            OnComponentChaged?.Invoke(this, entity, _components[index]);
         }
     }
 }

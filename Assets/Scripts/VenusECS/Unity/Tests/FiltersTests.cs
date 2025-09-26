@@ -18,12 +18,12 @@ public partial class SimplePoolTests
             {
                 var entity = Venus.Pools.CreateEntity();
                 entitiesList.Add(entity);
-                ref var testComponent = ref entity.Add<TestComponent>();
+                var testComponent = entity.Add<TestComponent>();
                 testComponent.SomeData = 300 + entity.Id;
 
                 if (i <= 10)
                 {
-                    ref var otherTestComponent = ref entity.Add<OtherTestComponent>();
+                    var otherTestComponent = entity.Add<OtherTestComponent>();
                     otherTestComponent.OtherData = 1200 + entity.Id;
                 }
             }
@@ -49,12 +49,12 @@ public partial class SimplePoolTests
             {
                 var entity = Venus.Pools.CreateEntity();
                 entitiesList.Add(entity);
-                ref var testComponent = ref entity.Add<TestComponent>();
+                var testComponent = entity.Add<TestComponent>();
                 testComponent.SomeData = 300 + entity.Id;
 
                 if (i <= 10)
                 {
-                    ref var otherTestComponent = ref entity.Add<OtherTestComponent>();
+                    var otherTestComponent = entity.Add<OtherTestComponent>();
                     otherTestComponent.OtherData = 1200 + entity.Id;
                 }
             }
@@ -79,12 +79,12 @@ public partial class SimplePoolTests
             {
                 var entity = Venus.Pools.CreateEntity();
                 entitiesList.Add(entity);
-                ref var testComponent = ref entity.Add<TestComponent>();
+                var testComponent = entity.Add<TestComponent>();
                 testComponent.SomeData = 300 + entity.Id;
 
                 if (i <= 10)
                 {
-                    ref var otherTestComponent = ref entity.Add<OtherTestComponent>();
+                    var otherTestComponent = entity.Add<OtherTestComponent>();
                     otherTestComponent.OtherData = 1200 + entity.Id;
                 }
             }

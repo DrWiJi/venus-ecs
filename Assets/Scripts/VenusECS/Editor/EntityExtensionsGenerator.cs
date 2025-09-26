@@ -31,10 +31,10 @@ namespace VenusECS.Extensions
 ";
 
         private static string _addMethodTemplate =
-            $@"        public static ref {_componentTypeTarget} Add{_componentTypeTarget}(this VenusEntity entity)
+            $@"        public static {_componentTypeTarget} Add{_componentTypeTarget}(this VenusEntity entity)
         {{
             var pool = ((VenusPools)Venus.Pools).{_componentTypeTarget}Pool;
-            return ref pool.AddTyped(entity);
+            return pool.AddTyped(entity);
         }}";
 
         private static string _delMethodTemplate =
@@ -55,21 +55,21 @@ namespace VenusECS.Extensions
         }}";
 
         private static string _getMethodTemplate =
-            $@"        public static ref {_componentTypeTarget} Get{_componentTypeTarget}(this VenusEntity entity)
+            $@"        public static {_componentTypeTarget} Get{_componentTypeTarget}(this VenusEntity entity)
         {{
             var pool = ((VenusPools)Venus.Pools).{_componentTypeTarget}Pool;
-            return ref pool.GetTyped(entity);
+            return pool.GetTyped(entity);
         }}";
 
         private static string _getOrAddMethodTemplate =
-            $@"        public static ref {_componentTypeTarget} GetOrAdd{_componentTypeTarget}(this VenusEntity entity)
+            $@"        public static {_componentTypeTarget} GetOrAdd{_componentTypeTarget}(this VenusEntity entity)
         {{
             var pool = ((VenusPools)Venus.Pools).{_componentTypeTarget}Pool;
             if (pool.HasTyped(entity))
             {{
-                return ref pool.GetTyped(entity);
+                return pool.GetTyped(entity);
             }}
-            return ref pool.AddTyped(entity);
+            return pool.AddTyped(entity);
         }}";
 
         private static string _hasMethodTemplate =
@@ -83,14 +83,7 @@ namespace VenusECS.Extensions
             $@"        public static void Set{_componentTypeTarget}(this VenusEntity entity, {_componentTypeTarget} component)
         {{
             var pool = ((VenusPools)Venus.Pools).{_componentTypeTarget}Pool;
-            if (pool.HasTyped(entity))
-            {{
-                pool.GetTyped(entity) = component;
-            }}
-            else
-            {{
-                pool.AddTyped(entity) = component;
-            }}
+            pool.SetTyped(entity, component);
         }}";
 
         private static string _generationTargetDirectory = "Assets/Scripts/VenusECS/Unity/Extensions/Generated";

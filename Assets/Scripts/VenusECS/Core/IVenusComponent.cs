@@ -1,6 +1,8 @@
-﻿namespace VenusECS.Core
+﻿using System;
+
+namespace VenusECS.Core
 {
-    public interface IVenusComponent
+    public interface IVenusComponent : IEquatable<IVenusComponent>
     {
         
     }

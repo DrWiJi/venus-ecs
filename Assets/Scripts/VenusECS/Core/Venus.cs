@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using VenusECS.Core.Pool;
@@ -8,15 +9,18 @@ namespace VenusECS.Core
     public static class Venus
     {
         private static IVenusPools _pools;
+        private static IVenusPoolsFactory _poolsFactory;
 
         public static IVenusPools Pools => _pools;
+        
+        public static List<IVenusPools> SecondaryPools = new();
 
         static Venus()
         {
-            InitializePools();
+            InitializeMainPools();
         }
 
-        private static void InitializePools()
+        private static void InitializeMainPools()
         {
             var factoryType = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(assembly => assembly.GetTypes())
@@ -30,11 +34,22 @@ namespace VenusECS.Core
 
             var factory = (IVenusPoolsFactory)Activator.CreateInstance(factoryType);
             _pools = factory.Create();
+            _poolsFactory = factory;
+        }
+
+        public static void CreateSecondaryPools()
+        {
+            SecondaryPools.Add(_poolsFactory.Create());
         }
 
         public static void Reset()
         {
             _pools.Clear();
+            foreach (var pool in SecondaryPools)
+            {
+                pool.Clear();
+            }
+            SecondaryPools.Clear();
         }
     }
 }

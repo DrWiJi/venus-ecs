@@ -7,8 +7,9 @@ namespace VenusECS.Core.Pool
     {
         event Action<IVenusPool, VenusEntity> OnEntityAdded;
         event Action<IVenusPool, VenusEntity> OnEntityRemoved;
-        ref T Get<T>(VenusEntity entity) where T : struct, IVenusComponent;
-        ref T Add<T>(VenusEntity entity) where T : struct, IVenusComponent;
+        T Get<T>(VenusEntity entity) where T : struct, IVenusComponent;
+        T Add<T>(VenusEntity entity) where T : struct, IVenusComponent;
+        void Set<T>(VenusEntity entity, T value) where T : struct, IVenusComponent;
         void Remove(VenusEntity entity);
         bool Has<T>(VenusEntity entity) where T : struct, IVenusComponent;
         void Clear();

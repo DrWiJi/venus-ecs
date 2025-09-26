@@ -7,5 +7,10 @@ namespace VenusECS.Unity.Components
     public struct OtherTestComponent : IVenusComponent
     {
         public int OtherData;
+
+        public bool Equals(IVenusComponent other)
+        {
+            return OtherData == ((OtherTestComponent)other).OtherData;
+        }
     }
 }

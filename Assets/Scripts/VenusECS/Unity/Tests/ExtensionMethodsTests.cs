@@ -30,7 +30,7 @@ public partial class SimplePoolTests
             // ---- Test Add ----
             
             // Direct typed access
-            ref var testComponent = ref ((VenusPool<TestComponent>)testPool).AddTyped(entity);
+            var testComponent = ((VenusPool<TestComponent>)testPool).AddTyped(entity);
             testComponent.SomeData = 42;
             
             // Check component exists
@@ -40,7 +40,7 @@ public partial class SimplePoolTests
             // ---- Test Get ----
             
             // Direct typed access
-            ref var getComponent = ref ((VenusPool<TestComponent>)testPool).GetTyped(entity);
+            var getComponent = ((VenusPool<TestComponent>)testPool).GetTyped(entity);
             getComponent.SomeData = 100;
             
             // Check value updated
@@ -83,9 +83,9 @@ public partial class SimplePoolTests
             
             // ---- Test GetOrAdd ----
             
-            ref var orAddComponent = ref (testPool.HasTyped(entity) ? 
-                ref ((VenusPool<TestComponent>)testPool).GetTyped(entity) : 
-                ref ((VenusPool<TestComponent>)testPool).AddTyped(entity));
+            var orAddComponent = (testPool.HasTyped(entity) ? 
+                ((VenusPool<TestComponent>)testPool).GetTyped(entity) : 
+                ((VenusPool<TestComponent>)testPool).AddTyped(entity));
             
             orAddComponent.SomeData = 200;
             
@@ -104,12 +104,12 @@ public partial class SimplePoolTests
             var testPool = Venus.Pools.GetPool<TestComponent>();
             
             // Add component using generic method
-            ref var component1 = ref entity.Add<TestComponent>();
+            var component1 = entity.Add<TestComponent>();
             component1.SomeData = 100;
             
             // Add component using direct typed method on a different entity
             var entity2 = Venus.Pools.CreateEntity();
-            ref var component2 = ref ((VenusPool<TestComponent>)testPool).AddTyped(entity2);
+            var component2 = ((VenusPool<TestComponent>)testPool).AddTyped(entity2);
             component2.SomeData = 200;
             
             // Verify both components were added correctly
@@ -129,13 +129,13 @@ public partial class SimplePoolTests
             var posPool = Venus.Pools.GetPool<PositionComponent>();
             
             // Add different component types
-            ref var test = ref ((VenusPool<TestComponent>)testPool).AddTyped(entity);
+            var test = ((VenusPool<TestComponent>)testPool).AddTyped(entity);
             test.SomeData = 42;
             
-            ref var other = ref ((VenusPool<OtherTestComponent>)otherPool).AddTyped(entity);
+            var other = ((VenusPool<OtherTestComponent>)otherPool).AddTyped(entity);
             other.OtherData = 100;
             
-            ref var pos = ref ((VenusPool<PositionComponent>)posPool).AddTyped(entity);
+            var pos = ((VenusPool<PositionComponent>)posPool).AddTyped(entity);
             pos.Position = new Vector2(1, 2);
             
             // Verify all components exist and have correct values
@@ -163,11 +163,11 @@ public partial class SimplePoolTests
             // Set component when it doesn't exist yet (should add)
             if (testPool.HasTyped(entity))
             {
-                ((VenusPool<TestComponent>)testPool).GetTyped(entity) = newComponent;
+                ((VenusPool<TestComponent>)testPool).SetTyped(entity, newComponent);
             }
             else
             {
-                ((VenusPool<TestComponent>)testPool).AddTyped(entity) = newComponent;
+                ((VenusPool<TestComponent>)testPool).SetTyped(entity, newComponent);
             }
             
             // Verify component was added with correct values
@@ -180,11 +180,11 @@ public partial class SimplePoolTests
             // Set component when it already exists (should update)
             if (testPool.HasTyped(entity))
             {
-                ((VenusPool<TestComponent>)testPool).GetTyped(entity) = updatedComponent;
+                ((VenusPool<TestComponent>)testPool).SetTyped(entity, updatedComponent);
             }
             else
             {
-                ((VenusPool<TestComponent>)testPool).AddTyped(entity) = updatedComponent;
+                ((VenusPool<TestComponent>)testPool).SetTyped(entity, updatedComponent);
             }
             
             // Verify component was updated with new values
@@ -204,14 +204,14 @@ public partial class SimplePoolTests
                 var testPool = Venus.Pools.GetPool<TestComponent>();
                 
                 // Add TestComponent to all entities
-                ref var test = ref ((VenusPool<TestComponent>)testPool).AddTyped(entity);
+                var test = ((VenusPool<TestComponent>)testPool).AddTyped(entity);
                 test.SomeData = i;
                 
                 // Add OtherTestComponent to even entities
                 if (i % 2 == 0)
                 {
                     var otherPool = Venus.Pools.GetPool<OtherTestComponent>();
-                    ref var other = ref ((VenusPool<OtherTestComponent>)otherPool).AddTyped(entity);
+                    var other = ((VenusPool<OtherTestComponent>)otherPool).AddTyped(entity);
                     other.OtherData = i * 10;
                 }
             }

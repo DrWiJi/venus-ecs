@@ -33,27 +33,27 @@ public partial class SimplePoolTests
                 var entity = Venus.Pools.CreateEntity();
                 
                 // Add TagComponent to all entities
-                ref var tag = ref entity.Add<TagComponent>(); 
+                var tag = entity.Add<TagComponent>(); 
                 tag.Tag = i;
                 
                 // Add TestComponent to even entities
                 if (i % 2 == 0)
                 {
-                    ref var test = ref entity.Add<TestComponent>();
+                    var test = entity.Add<TestComponent>();
                     test.SomeData = i;
                 }
                 
                 // Add PositionComponent to entities divisible by 3
                 if (i % 3 == 0)
                 {
-                    ref var pos = ref entity.Add<PositionComponent>();
+                    var pos = entity.Add<PositionComponent>();
                     pos.Position = new UnityEngine.Vector2(i, i);
                 }
                 
                 // Add OtherTestComponent to entities divisible by 5
                 if (i % 5 == 0)
                 {
-                    ref var other = ref entity.Add<OtherTestComponent>();
+                    var other = entity.Add<OtherTestComponent>();
                     other.OtherData = i;
                 }
             }
@@ -120,7 +120,7 @@ public partial class SimplePoolTests
                 entities.Add(entity);
                 
                 // Start with all entities having TagComponent only
-                ref var tag = ref entity.Add<TagComponent>();
+                var tag = entity.Add<TagComponent>();
                 tag.Tag = i;
             }
             
@@ -140,7 +140,7 @@ public partial class SimplePoolTests
             {
                 if (i % 2 == 1)
                 {
-                    ref var test = ref entities[i].Add<TestComponent>();
+                    var test = entities[i].Add<TestComponent>();
                     test.SomeData = i;
                 }
             }
@@ -160,7 +160,7 @@ public partial class SimplePoolTests
             {
                 if (i % 2 == 0)
                 {
-                    ref var test = ref entities[i].GetOrAdd<TestComponent>();
+                    var test = entities[i].GetOrAdd<TestComponent>();
                     test.SomeData = i;
                 }
             }

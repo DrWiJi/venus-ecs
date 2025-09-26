@@ -144,27 +144,27 @@ public partial class SimplePoolTests
                 var entity = Venus.Pools.CreateEntity();
                 
                 // All entities have tag
-                ref var tag = ref entity.Add<TagComponent>();
+                var tag = entity.Add<TagComponent>();
                 tag.Tag = i;
                 
                 // Add position to even IDs
                 if (i % 2 == 0)
                 {
-                    ref var pos = ref entity.Add<PositionComponent>();
+                    var pos = entity.Add<PositionComponent>();
                     pos.Position = new Vector2(i, i);
                 }
                 
                 // Add TestComponent to IDs divisible by 3
                 if (i % 3 == 0)
                 {
-                    ref var test = ref entity.Add<TestComponent>();
+                    var test = entity.Add<TestComponent>();
                     test.SomeData = i * 100;
                 }
                 
                 // Add OtherTestComponent to IDs divisible by 4
                 if (i % 4 == 0)
                 {
-                    ref var other = ref entity.Add<OtherTestComponent>();
+                    var other = entity.Add<OtherTestComponent>();
                     other.OtherData = i * 200;
                 }
             }
