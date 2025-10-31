@@ -5,14 +5,14 @@ namespace VenusECS.Core.Pool
     public class Exclude<T1> : BaseVenusExcludeFilter 
         where T1 : struct, IVenusComponent
     {
-        private List<IVenusPool> _pool;
+        private List<int> _pool;
 
-        public override List<IVenusPool> PoolsToExclude => _pool;
+        public override List<int> PoolsToExclude => _pool;
 
-        public Exclude() : base()
+        public Exclude(bool useSecondaryPools = false) : base(useSecondaryPools)
         {
             _pool = new();
-            _pool.Add(_pools.GetPool<T1>());
+            _pool.Add(_pools.GetPool<T1>().GetPoolIndex());
         }
     }
     
@@ -20,15 +20,15 @@ namespace VenusECS.Core.Pool
         where T1 : struct, IVenusComponent
         where T2 : struct, IVenusComponent
     {
-        private List<IVenusPool> _pool;
+        private List<int> _pool;
 
-        public override List<IVenusPool> PoolsToExclude => _pool;
+        public override List<int> PoolsToExclude => _pool;
 
-        public Exclude() : base()
+        public Exclude(bool useSecondaryPools = false) : base(useSecondaryPools)
         {
             _pool = new();
-            _pool.Add(_pools.GetPool<T1>());
-            _pool.Add(_pools.GetPool<T2>());
+            _pool.Add(_pools.GetPool<T1>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T2>().GetPoolIndex());
         }
     }
 
@@ -37,16 +37,16 @@ namespace VenusECS.Core.Pool
         where T2 : struct, IVenusComponent
         where T3 : struct, IVenusComponent
     {
-        private List<IVenusPool> _pool;
+        private List<int> _pool;
 
-        public override List<IVenusPool> PoolsToExclude => _pool;
+        public override List<int> PoolsToExclude => _pool;
 
-        public Exclude() : base()
+        public Exclude(bool useSecondaryPools = false) : base(useSecondaryPools)
         {
             _pool = new();
-            _pool.Add(_pools.GetPool<T1>());
-            _pool.Add(_pools.GetPool<T2>());
-            _pool.Add(_pools.GetPool<T3>());
+            _pool.Add(_pools.GetPool<T1>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T2>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T3>().GetPoolIndex());
         }
     }
 
@@ -56,17 +56,17 @@ namespace VenusECS.Core.Pool
         where T3 : struct, IVenusComponent
         where T4 : struct, IVenusComponent
     {
-        private List<IVenusPool> _pool;
+        private List<int> _pool;
 
-        public override List<IVenusPool> PoolsToExclude => _pool;
+        public override List<int> PoolsToExclude => _pool;
 
-        public Exclude() : base()
+        public Exclude(bool useSecondaryPools = false) : base(useSecondaryPools)
         {
             _pool = new();
-            _pool.Add(_pools.GetPool<T1>());
-            _pool.Add(_pools.GetPool<T2>());
-            _pool.Add(_pools.GetPool<T3>());
-            _pool.Add(_pools.GetPool<T4>());
+            _pool.Add(_pools.GetPool<T1>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T2>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T3>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T4>().GetPoolIndex());
         }
     }
 
@@ -77,18 +77,18 @@ namespace VenusECS.Core.Pool
         where T4 : struct, IVenusComponent
         where T5 : struct, IVenusComponent
     {
-        private List<IVenusPool> _pool;
+        private List<int> _pool;
 
-        public override List<IVenusPool> PoolsToExclude => _pool;
+        public override List<int> PoolsToExclude => _pool;
 
-        public Exclude() : base()
+        public Exclude(bool useSecondaryPools = false) : base(useSecondaryPools)
         {
             _pool = new();
-            _pool.Add(_pools.GetPool<T1>());
-            _pool.Add(_pools.GetPool<T2>());
-            _pool.Add(_pools.GetPool<T3>());
-            _pool.Add(_pools.GetPool<T4>());
-            _pool.Add(_pools.GetPool<T5>());
+            _pool.Add(_pools.GetPool<T1>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T2>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T3>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T4>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T5>().GetPoolIndex());
         }
     }
 
@@ -100,19 +100,19 @@ namespace VenusECS.Core.Pool
         where T5 : struct, IVenusComponent
         where T6 : struct, IVenusComponent
     {
-        private List<IVenusPool> _pool;
+        private List<int> _pool;
 
-        public override List<IVenusPool> PoolsToExclude => _pool;
+        public override List<int> PoolsToExclude => _pool;
 
-        public Exclude() : base()
+        public Exclude(bool useSecondaryPools = false) : base(useSecondaryPools)
         {
             _pool = new();
-            _pool.Add(_pools.GetPool<T1>());
-            _pool.Add(_pools.GetPool<T2>());
-            _pool.Add(_pools.GetPool<T3>());
-            _pool.Add(_pools.GetPool<T4>());
-            _pool.Add(_pools.GetPool<T5>());
-            _pool.Add(_pools.GetPool<T6>());
+            _pool.Add(_pools.GetPool<T1>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T2>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T3>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T4>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T5>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T6>().GetPoolIndex());
         }
     }
 
@@ -125,20 +125,20 @@ namespace VenusECS.Core.Pool
         where T6 : struct, IVenusComponent
         where T7 : struct, IVenusComponent
     {
-        private List<IVenusPool> _pool;
+        private List<int> _pool;
 
-        public override List<IVenusPool> PoolsToExclude => _pool;
+        public override List<int> PoolsToExclude => _pool;
 
-        public Exclude() : base()
+        public Exclude(bool useSecondaryPools = false) : base(useSecondaryPools)
         {
             _pool = new();
-            _pool.Add(_pools.GetPool<T1>());
-            _pool.Add(_pools.GetPool<T2>());
-            _pool.Add(_pools.GetPool<T3>());
-            _pool.Add(_pools.GetPool<T4>());
-            _pool.Add(_pools.GetPool<T5>());
-            _pool.Add(_pools.GetPool<T6>());
-            _pool.Add(_pools.GetPool<T7>());
+            _pool.Add(_pools.GetPool<T1>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T2>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T3>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T4>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T5>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T6>().GetPoolIndex());
+            _pool.Add(_pools.GetPool<T7>().GetPoolIndex());
         }
     }
 }

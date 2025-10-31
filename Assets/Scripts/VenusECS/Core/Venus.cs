@@ -15,6 +15,8 @@ namespace VenusECS.Core
         
         public static readonly List<IVenusPools> SecondaryPools = new();
 
+        public static int CurrentSecondaryPoolIndex = 0;
+
         static Venus()
         {
             InitializeMainPools();
@@ -37,10 +39,15 @@ namespace VenusECS.Core
             _poolsFactory = factory;
         }
 
-        public static IVenusPools CreateSecondaryPools()
+        public static int CreateSecondaryPools()
         {
             SecondaryPools.Add(_poolsFactory.Create());
-            return SecondaryPools[SecondaryPools.Count - 1];
+            return SecondaryPools.Count - 1;
+        }
+
+        public static void SwitchSecondaryPool(int index)
+        {
+            CurrentSecondaryPoolIndex = index;
         }
 
         public static void Reset()

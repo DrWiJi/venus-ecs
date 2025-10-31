@@ -147,9 +147,10 @@ namespace VenusECS.Core
 
         public (PoolsDeltaPortion[], byte[]) FlushDelta()
         {
+            var result = (_deltaPortions, _deltaPortionsData.AsSpan(0, _deltaPortionsDataCounter).ToArray());
             _deltaPortionsCounter = 0;
             _deltaPortionsDataCounter = 0;
-            return (_deltaPortions, _deltaPortionsData);
+            return result;
         }
 
         public void ApplyDelta(PoolsDeltaPortion[] deltaPortions, byte[] deltaPortionsData)
@@ -381,6 +382,11 @@ namespace VenusECS.Core
             }
 
             return;
+        }
+
+        public IVenusPool GetPool(int index)
+        {
+            return _poolsArray[index];
         }
     }
 }

@@ -88,9 +88,9 @@ namespace VenusECS.Extensions
 
         // All secondary pools are read only, so we don't need to add set method
         private static string _GetSecondaryMethodTemplate =
-            $@"        public static {_componentTypeTarget} GetSecondary{_componentTypeTarget}(this VenusEntity entity, int index)
+            $@"        public static {_componentTypeTarget} GetSecondary{_componentTypeTarget}(this VenusEntity entity)
         {{
-            var pool = ((VenusPools)Venus.SecondaryPools[index]).{_componentTypeTarget}Pool;
+            var pool = ((VenusPools)Venus.SecondaryPools[Venus.CurrentSecondaryPoolIndex]).{_componentTypeTarget}Pool;
             return pool.GetTyped(entity);
         }}";
 

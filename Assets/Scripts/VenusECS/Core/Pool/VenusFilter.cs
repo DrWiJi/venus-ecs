@@ -66,8 +66,10 @@ namespace VenusECS.Core.Pool
             _bitsPerInt = 0;
             
             // Calculate min/max entity IDs from include pools
-            foreach (var pool in _include.PoolsToInclude)
+            foreach (var poolIndex in _include.PoolsToInclude)
             {
+                var pools = _include.UseSecondaryPools ? _include.SecondaryPools[Venus.CurrentSecondaryPoolIndex] : _include.Pools;
+                var pool = pools.GetPool(poolIndex);
                 _minEntityId = Math.Min(_minEntityId, pool.MinEntityId);
                 _maxEntityId = Math.Max(_maxEntityId, pool.MaxEntityId);
                 if (_bitsPerInt == 0) _bitsPerInt = pool.BitsPerInt;
@@ -76,8 +78,10 @@ namespace VenusECS.Core.Pool
             // Also consider exclude pools for min/max calculation
             if (_exclude != null && _exclude.PoolsToExclude.Count > 0)
             {
-                foreach (var pool in _exclude.PoolsToExclude)
+                foreach (var poolIndex in _exclude.PoolsToExclude)
                 {
+                    var pools = _exclude.UseSecondaryPools ? _exclude.SecondaryPools[Venus.CurrentSecondaryPoolIndex] : _exclude.Pools;
+                    var pool = pools.GetPool(poolIndex);
                     _minEntityId = Math.Min(_minEntityId, pool.MinEntityId);
                     _maxEntityId = Math.Max(_maxEntityId, pool.MaxEntityId);
                     if (_bitsPerInt == 0) _bitsPerInt = pool.BitsPerInt;
@@ -93,8 +97,10 @@ namespace VenusECS.Core.Pool
             _currentMask = ~0;
             
             // For include, we need all bits to be set (AND)
-            foreach (var pool in _include.PoolsToInclude)
+            foreach (var poolIndex in _include.PoolsToInclude)
             {
+                var pools = _exclude.UseSecondaryPools ? _exclude.SecondaryPools[Venus.CurrentSecondaryPoolIndex] : _exclude.Pools;
+                var pool = pools.GetPool(poolIndex);
                 int poolOffset = (pool.MinEntityId - _minEntityId) / _bitsPerInt;
                 int poolChunkIndex = _currentChunkIndex - poolOffset;
                 
@@ -115,8 +121,10 @@ namespace VenusECS.Core.Pool
             _currentExcludeMask = 0;
             if (_exclude != null && _exclude.PoolsToExclude.Count > 0)
             {
-                foreach (var pool in _exclude.PoolsToExclude)
+                foreach (var poolIndex in _exclude.PoolsToExclude)
                 {
+                    var pools = _exclude.UseSecondaryPools ? _exclude.SecondaryPools[Venus.CurrentSecondaryPoolIndex] : _exclude.Pools;
+                    var pool = pools.GetPool(poolIndex);
                     int poolOffset = (pool.MinEntityId - _minEntityId) / _bitsPerInt;
                     int poolChunkIndex = _currentChunkIndex - poolOffset;
                     

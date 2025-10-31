@@ -4,6 +4,9 @@ namespace VenusECS.Core.Pool
 {
     public interface IExcludeVenusFilter
     {
-        List<IVenusPool> PoolsToExclude { get; }
+        IVenusPools Pools { get; }
+        List<IVenusPools> SecondaryPools { get; }
+        bool UseSecondaryPools { get; }
+        List<int> PoolsToExclude { get; }
     }
 }
