@@ -1,6 +1,7 @@
 using System;
 using Project.Services.NetTransportService;
 using VenusECS.Core.Pool;
+using static Project.Services.VenusNetService.VenusNetService;
 
 namespace Project.Services.VenusNetService
 {
@@ -17,7 +18,7 @@ namespace Project.Services.VenusNetService
         IVenusPools GetDefaultWorld();
         void AddPeer(NetTransportPeer peer);
         void RemovePeer(NetTransportPeer peer);
-        void ApplyDelta(NetTransportPeer peer, byte[] delta);
+        void ApplyDelta(NetTransportPeer peer, WorldDeltaPayload deltaPayload);
         void ApplySnapshot(NetTransportPeer peer, byte[] data);
         void Reset();
         long GetCurrentFrame();

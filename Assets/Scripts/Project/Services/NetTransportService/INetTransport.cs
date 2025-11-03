@@ -51,9 +51,9 @@ namespace Project.Services.NetTransportService
                 throw new ArgumentNullException(nameof(data));
             }
 
-            if (type < 0)
+            if (type <= 0)
             {
-                throw new ArgumentException("Type cannot be less than 0");
+                throw new ArgumentException($"Type {type} is not valid. {nameof(type)} must be greater than 0.");
             }
 
             Data = data;

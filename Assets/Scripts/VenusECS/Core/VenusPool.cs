@@ -2,6 +2,7 @@ using System;
 using Unity.Collections.LowLevel.Unsafe;
 using VenusECS.Core.Reflection.Attributes;
 using System.Collections.Generic;
+using MessagePack;
 
 namespace VenusECS.Core.Pool
 {
@@ -300,16 +301,13 @@ namespace VenusECS.Core.Pool
             // Write components
             if (componentsLength > 0)
             {
-                unsafe
+                for (int i = 0; i < componentsLength; i++)
                 {
-                    fixed (byte* dst = &snapshot[offset])
-                    {
-                        void* src = UnsafeUtility.AddressOf(ref _components[0]);
-                        UnsafeUtility.MemCpy(dst, src, componentsBytes);
-                    }
+                    var srcBytes = MessagePackSerializer.Serialize(_components[i]);
+                    Buffer.BlockCopy(srcBytes, 0, snapshot, offset, srcBytes.Length);
+                    offset += srcBytes.Length;
                 }
             }
-
             return snapshot;
         }
 
@@ -403,13 +401,12 @@ namespace VenusECS.Core.Pool
             // Read components
             if (componentsLength > 0)
             {
-                unsafe
+                for(int i = 0; i < componentsLength; i++)
                 {
-                    fixed (byte* src = &snapshot[offset])
-                    {
-                        void* dst = UnsafeUtility.AddressOf(ref _components[0]);
-                        UnsafeUtility.MemCpy(dst, src, componentsBytes);
-                    }
+                    var srcBytes = new byte[componentSize];
+                    Buffer.BlockCopy(snapshot, offset, srcBytes, 0, componentSize);
+                    _components[i] = MessagePackSerializer.Deserialize<T>(srcBytes);
+                    offset += componentSize;
                 }
             }
         }

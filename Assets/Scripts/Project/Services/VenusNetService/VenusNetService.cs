@@ -97,7 +97,7 @@ namespace Project.Services.VenusNetService
             serverDeltaPayload.SetData(Array.Empty<byte>(), (int)NetMessageTypes.WorldDelta);
             _netTransportService.SendMessageToGameServer(serverDeltaPayload);
             var deltaPayload = new NetDataPayload();
-            var deltaPortionsData = _venusNetWorldsSynchronator.GetDefaultWorld().FlushDelta().deltaPortionsData;
+            var deltaPortionsData = _venusNetWorldsSynchronator.GetDefaultWorld().FlushDelta();
             var worldDeltaPayload = new WorldDeltaPayload { Frame = frame, Data = deltaPortionsData };
             deltaPayload.SetData(worldDeltaPayload.ToByteArray(), (int)NetMessageTypes.WorldDelta);
             
@@ -169,7 +169,9 @@ namespace Project.Services.VenusNetService
                     break;
                 case (int)NetMessageTypes.WorldDelta:
                     Debug.Log("WorldDelta received");
-                    _venusNetWorldsSynchronator.ApplyDelta(sender, payload.Data);
+                    //Deserialize the delta
+                    var delta = WorldDeltaPayload.FromByteArray(payload.Data);
+                    _venusNetWorldsSynchronator.ApplyDelta(sender, delta);
                     break;
                 case (int)NetMessageTypes.TimeSync:
                     Debug.Log("TimeSync received");
@@ -177,8 +179,8 @@ namespace Project.Services.VenusNetService
                 case (int)NetMessageTypes.RequestServerSnapshot:
                     Debug.Log("RequestServerSnapshot received");
                     var reqServerSnapshotPayload = new NetDataPayload();
-                    _venusNetWorldsSynchronator.GetDefaultWorld().GetSnapshot();
-                    reqServerSnapshotPayload.SetData(Array.Empty<byte>(), (int)NetMessageTypes.WorldSnapshot);
+                    var snapshot = _venusNetWorldsSynchronator.GetDefaultWorld().GetSnapshot();
+                    reqServerSnapshotPayload.SetData(snapshot, (int)NetMessageTypes.WorldSnapshot);
                     _netTransportService.SendMessageToPeer(sender, reqServerSnapshotPayload);
                     break;
                 default:

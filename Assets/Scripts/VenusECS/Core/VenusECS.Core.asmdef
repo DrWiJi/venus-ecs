@@ -1,7 +1,9 @@
 {
     "name": "VenusECS.Core",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:034c977408447714e91237bd5f97c1ff"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,

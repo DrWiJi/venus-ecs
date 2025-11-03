@@ -2,6 +2,7 @@ namespace Project.Services.VenusNetService
 {
 	public enum NetMessageTypes
 	{
+		NotDefined = 0,
 		Heartbeat = 1,
 		HeartbeatAck = 2,
 		ServerWelcome = 3,

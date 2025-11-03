@@ -1,7 +1,11 @@
 {
     "name": "Project.Core",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:7c87dc875cdfb834385e466c56d2c624",
+        "GUID:19bfb73a9ca4bd8439af67014e8d6d45",
+        "GUID:0247e93e768e6d64b8609ec1afbb8f8f"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

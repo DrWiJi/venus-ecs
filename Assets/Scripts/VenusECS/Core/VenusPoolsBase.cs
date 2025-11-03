@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MessagePack;
 using Unity.Collections.LowLevel.Unsafe;
 using VenusECS.Core.Pool;
 
 namespace VenusECS.Core
 {
+    [MessagePackObject]
     public struct PoolsDeltaPortion
     {
         public enum EAction
@@ -14,10 +16,15 @@ namespace VenusECS.Core
             Remove,
             Change
         }
+        [Key(0)]
         public EAction Action;
+        [Key(1)]
         public VenusEntity Entity;
+        [Key(2)]
         public int PoolIndex;
+        [Key(3)]
         public int DataStartIndex;
+        [Key(4)]
         public int DataLength;
     }
 

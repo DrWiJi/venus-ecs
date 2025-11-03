@@ -1,9 +1,12 @@
 ﻿using System;
+using MessagePack;
 
 namespace VenusECS.Core
 {
+    [MessagePackObject]
     public struct VenusEntity : IEquatable<VenusEntity>
     {
+        [Key(0)]
         public int Id;
 
         public override int GetHashCode()
