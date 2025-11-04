@@ -3,6 +3,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using VenusECS.Core.Reflection.Attributes;
 using System.Collections.Generic;
 using MessagePack;
+using System.Reflection;
 
 namespace VenusECS.Core.Pool
 {
@@ -245,6 +246,10 @@ namespace VenusECS.Core.Pool
 
         public byte[] GetSnapshot()
         {
+            //If component type is not serializable, return empty snapshot
+            if (typeof(T).GetCustomAttribute<MessagePackObjectAttribute>() == null)
+                return Array.Empty<byte>();
+
             // Header layout (int32 each):
             // [0] version
             // [1] bitsPerInt
@@ -313,6 +318,10 @@ namespace VenusECS.Core.Pool
 
         public void RestoreSnapshot(byte[] snapshot)
         {
+            //If component type is not MessagePackObject, return
+            if (typeof(T).GetCustomAttribute<MessagePackObjectAttribute>() == null)
+                return;
+
             if (snapshot == null || snapshot.Length == 0) return;
 
             const int headerInts = 9;

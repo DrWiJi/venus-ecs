@@ -9,9 +9,9 @@ using static Project.Services.VenusNetService.VenusNetService;
 
 namespace Project.Core
 {
-    public class BaseGameBootstrap : IVenusNetWorldsSynchronator
+    public class BaseGameBootstrap : MonoBehaviour, IVenusNetWorldsSynchronator
     {
-        public event Action OnRequestServerSnapshot;
+        public event Action OnServerSnapshotNeeded;
         public event Action<long> OnDeltaReady;
         protected Dictionary<NetTransportPeer, int> _peersWorldsIndices = new();
 
@@ -31,14 +31,14 @@ namespace Project.Core
         {
             var worldIndex = _peersWorldsIndices[peer];
             var world = Venus.SecondaryPools[worldIndex];
-            //deserialize delta
-            //var 
-            //world.ApplyDelta(delta);
+            world.ApplyDelta(deltaPayload.Data.deltaPortions, deltaPayload.Data.deltaPortionsData);
         }
 
         public void ApplySnapshot(NetTransportPeer peer, byte[] data)
         {
-            throw new NotImplementedException();
+            var worldIndex = _peersWorldsIndices[peer];
+            var world = Venus.SecondaryPools[worldIndex];
+            world.RestoreSnapshot(data);
         }
 
         public long GetCurrentFrame()

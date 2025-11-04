@@ -5,6 +5,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Linq;
 
 namespace Project.Services.VenusNetService
 {
@@ -27,7 +29,7 @@ namespace Project.Services.VenusNetService
         {
             _netTransportService = netTransportService;
             _venusNetWorldsSynchronator = venusNetWorldsSynchronator;
-            _venusNetWorldsSynchronator.OnRequestServerSnapshot += OnRequestServerSnapshot;
+            _venusNetWorldsSynchronator.OnServerSnapshotNeeded += OnRequestServerSnapshot;
             _venusNetWorldsSynchronator.OnDeltaReady += OnDeltaReady;
             _netTransportService.OnMessageReceived += OnTransportMessage;
             _netTransportService.OnClientConnected += OnClientConnected;
@@ -48,7 +50,7 @@ namespace Project.Services.VenusNetService
         {
             if (_netTransportService != null)
             {
-                _venusNetWorldsSynchronator.OnRequestServerSnapshot -= OnRequestServerSnapshot;
+                _venusNetWorldsSynchronator.OnServerSnapshotNeeded -= OnRequestServerSnapshot;
                 _venusNetWorldsSynchronator.OnDeltaReady -= OnDeltaReady;
                 _netTransportService.OnMessageReceived -= OnTransportMessage;
                 _netTransportService.OnClientConnected -= OnClientConnected;
@@ -162,16 +164,37 @@ namespace Project.Services.VenusNetService
                         _netTransportService.SendMessageToGameServer(clientWelcomePayload);
                         break;
                     }
-
                 case (int)NetMessageTypes.WorldSnapshot:
                     Debug.Log("WorldSnapshot received");
-                    _venusNetWorldsSynchronator.ApplySnapshot(sender, payload.Data);
+                    //Layout:
+                    // [..] Data (byte[])
+                    // [^32] Hash (SHA-256, 32 bytes) computed over all preceding bytes
+                    using (var sha = SHA256.Create())
+                    {
+                        var hash = sha.ComputeHash(payload.Data);
+                        if (!hash.AsSpan().SequenceEqual(new ReadOnlySpan<byte>(payload.Data, payload.Data.Length - 32, 32)))
+                        {
+                            //TODO: Retry request snapshot from the peer
+                            Debug.LogError("Hash mismatch");
+                            return;
+                        }
+                        _venusNetWorldsSynchronator.ApplySnapshot(sender, payload.Data[..^32]);
+                    }
+                    
                     break;
                 case (int)NetMessageTypes.WorldDelta:
                     Debug.Log("WorldDelta received");
                     //Deserialize the delta
                     var delta = WorldDeltaPayload.FromByteArray(payload.Data);
-                    _venusNetWorldsSynchronator.ApplyDelta(sender, delta);
+                    if (delta.HasValue)
+                    {
+                        _venusNetWorldsSynchronator.ApplyDelta(sender, delta.Value);
+                    }
+                    else
+                    {
+                        //TODO: Request entire snapshot from the peer
+                        Debug.LogError("Failed to deserialize WorldDelta");
+                    }
                     break;
                 case (int)NetMessageTypes.TimeSync:
                     Debug.Log("TimeSync received");
@@ -180,8 +203,18 @@ namespace Project.Services.VenusNetService
                     Debug.Log("RequestServerSnapshot received");
                     var reqServerSnapshotPayload = new NetDataPayload();
                     var snapshot = _venusNetWorldsSynchronator.GetDefaultWorld().GetSnapshot();
-                    reqServerSnapshotPayload.SetData(snapshot, (int)NetMessageTypes.WorldSnapshot);
-                    _netTransportService.SendMessageToPeer(sender, reqServerSnapshotPayload);
+                    //Layout:
+                    // [..] Data (byte[])
+                    // [^32] Hash (SHA-256, 32 bytes) computed over all preceding bytes
+                    using (var sha = SHA256.Create())
+                    {
+                        var hash = sha.ComputeHash(snapshot);
+                        var snapshotWithHash = new byte[snapshot.Length + hash.Length];
+                        Buffer.BlockCopy(snapshot, 0, snapshotWithHash, 0, snapshot.Length);
+                        Buffer.BlockCopy(hash, 0, snapshotWithHash, snapshot.Length, hash.Length);
+                        reqServerSnapshotPayload.SetData(snapshotWithHash, (int)NetMessageTypes.WorldSnapshot);
+                        _netTransportService.SendMessageToPeer(sender, reqServerSnapshotPayload);
+                    }
                     break;
                 default:
                     break;

@@ -1,5 +1,6 @@
 using System;
 using MessagePack;
+using System.Security.Cryptography;
 using Unity.Collections.LowLevel.Unsafe;
 using VenusECS.Core;
 
@@ -22,6 +23,7 @@ namespace Project.Services.VenusNetService
                 // [16..19] DeltaPortionsDataLength (int)
                 // [..]     DeltaPortionsBytes (MessagePack of PoolsDeltaPortion[])
                 // [..]     DeltaPortionsData (raw byte[])
+                // [..]     Hash (SHA-256, 32 bytes) computed over all preceding bytes
 
                 var portions = Data.deltaPortions ?? Array.Empty<PoolsDeltaPortion>();
                 var portionsBytes = portions.Length > 0
@@ -30,7 +32,9 @@ namespace Project.Services.VenusNetService
                 var rawData = Data.deltaPortionsData ?? Array.Empty<byte>();
 
                 int headerSize = sizeof(long) + sizeof(int) + sizeof(int) + sizeof(int);
-                int totalSize = headerSize + portionsBytes.Length + rawData.Length;
+                int dataSizeWithoutHash = headerSize + portionsBytes.Length + rawData.Length;
+                const int hashSize = 32; // SHA-256
+                int totalSize = dataSizeWithoutHash + hashSize;
                 var bytes = new byte[totalSize];
 
                 int offset = 0;
@@ -52,21 +56,25 @@ namespace Project.Services.VenusNetService
                 if (rawData.Length > 0)
                 {
                     Buffer.BlockCopy(rawData, 0, bytes, offset, rawData.Length);
+                    offset += rawData.Length;
+                }
+
+                // Compute and append hash over [0..offset)
+                using (var sha = SHA256.Create())
+                {
+                    var hash = sha.ComputeHash(bytes, 0, offset);
+                    Buffer.BlockCopy(hash, 0, bytes, offset, hashSize);
                 }
 
                 return bytes;
             }
 
-            internal static WorldDeltaPayload FromByteArray(byte[] data)            
+            internal static WorldDeltaPayload? FromByteArray(byte[] data)            
             {
                 // Deserialize using the layout described above
                 if (data == null || data.Length < sizeof(long))
                 {
-                    return new WorldDeltaPayload
-                    {
-                        Frame = 0,
-                        Data = (Array.Empty<PoolsDeltaPortion>(), Array.Empty<byte>())
-                    };
+                    return null;
                 }
 
                 int offset = 0;
@@ -75,11 +83,7 @@ namespace Project.Services.VenusNetService
 
                 if (data.Length < sizeof(long) + sizeof(int) + sizeof(int) + sizeof(int))
                 {
-                    return new WorldDeltaPayload
-                    {
-                        Frame = frame,
-                        Data = (Array.Empty<PoolsDeltaPortion>(), Array.Empty<byte>())
-                    };
+                    return null;
                 }
 
                 int portionsCount = BitConverter.ToInt32(data, offset);
@@ -89,6 +93,27 @@ namespace Project.Services.VenusNetService
                 int rawDataLength = BitConverter.ToInt32(data, offset);
                 offset += sizeof(int);
 
+                // Compute expected end of content (before hash)
+                int contentEnd = offset + portionsBytesLength + rawDataLength;
+                const int hashSize = 32; // SHA-256
+                if (data.Length < contentEnd + hashSize)
+                {
+                    return null;
+                }
+
+                // Verify hash
+                using (var sha = SHA256.Create())
+                {
+                    var computed = sha.ComputeHash(data, 0, contentEnd);
+                    bool ok = true;
+                    for (int i = 0; i < hashSize; i++)
+                    {
+                        if (data[contentEnd + i] != computed[i]) { ok = false; break; }
+                    }
+                    if (!ok) return null;
+                }
+
+                // Deserialize portions
                 PoolsDeltaPortion[] portions = Array.Empty<PoolsDeltaPortion>();
                 if (portionsBytesLength > 0)
                 {

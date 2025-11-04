@@ -1,5 +1,5 @@
 {
-    "name": "Services.VenusNetService",
+    "name": "VenusECS.NetService",
     "rootNamespace": "",
     "references": [
         "GUID:19bfb73a9ca4bd8439af67014e8d6d45",

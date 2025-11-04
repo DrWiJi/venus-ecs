@@ -12,7 +12,7 @@ namespace Project.Services.VenusNetService
     //So clients play in their own world, but can see the correct state of the server world, than contains all client inputs and resolved predictions
     public interface IVenusNetWorldsSynchronator
     {
-        event Action OnRequestServerSnapshot;
+        event Action OnServerSnapshotNeeded;
         event Action<long> OnDeltaReady;
         IVenusPools GetWorld(NetTransportPeer peer);
         IVenusPools GetDefaultWorld();
