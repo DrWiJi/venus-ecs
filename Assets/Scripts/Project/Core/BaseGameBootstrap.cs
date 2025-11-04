@@ -62,13 +62,13 @@ namespace Project.Core
 
         private void FixedUpdate()
         {
-            DequeuePeersWorldsDelta();
+            DequeueDelta();
             _venusFixedLogicEngine.Tick();
             OnDeltaReady?.Invoke(_localSimulationFrame);
             _localSimulationFrame++;
         }
 
-        private void DequeuePeersWorldsDelta()
+        private void DequeueDelta()
         {
             //Dequeue next delta for peer world
             foreach (var kvp in _peersWorldsIndices)
@@ -77,17 +77,9 @@ namespace Project.Core
                 var deltaQueue = _deltaQueues[worldIndex];
                 //Must keep in mind jitter, so there must be a few frames delay between the delta and the local frame, that count must depend on the jitter
                 var jitter = _jitterStats[worldIndex];
-                // Decide how many deltas to leave in the queue based on jitter
-                // Low jitter -> leave 1; moderate -> leave 2; high -> leave 3
-                int leaveCount = 1;
-                if (jitter >= 2.5f)
-                {
-                    leaveCount = 3;
-                }
-                else if (jitter >= 1.0f)
-                {
-                    leaveCount = 2;
-                }
+                // Decide how many deltas to leave in the queue based on jitter (ceiling), clamped to [1, 4)
+                int leaveCount = Mathf.CeilToInt(jitter);
+                leaveCount = Mathf.Clamp(leaveCount, 1, 5);
 
                 int toApply = Mathf.Max(0, deltaQueue.Count - leaveCount);
                 if (toApply > 0)
