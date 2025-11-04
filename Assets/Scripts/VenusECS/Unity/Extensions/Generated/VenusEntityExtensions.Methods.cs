@@ -4,6 +4,8 @@ using VenusECS.Core;
 using VenusECS.Core.Pool;
 using VenusECS.Unity;
 using VenusECS.Unity.Components;
+using VenusECS.Unity.Components.Network;
+using VenusECS.Unity.Components.Movement;
 
 
 namespace VenusECS.Extensions
@@ -399,6 +401,153 @@ namespace VenusECS.Extensions
         public static void SetVenusEntityComponent(this VenusEntity entity, VenusEntityComponent component)
         {
             var pool = ((VenusPools)Venus.Pools).VenusEntityComponentPool;
+            pool.SetTyped(entity, component);
+        }
+
+        public static OwnershipComponent AddOwnershipComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipComponentPool;
+            return pool.AddTyped(entity);
+        }
+
+        public static void DelOwnershipComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipComponentPool;
+            pool.RemoveTyped(entity);
+        }
+
+        public static void DelIfExistsOwnershipComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipComponentPool;
+            if (pool.HasTyped(entity))
+            {
+                pool.RemoveTyped(entity);
+            }
+        }
+
+        public static OwnershipComponent GetOwnershipComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipComponentPool;
+            return pool.GetTyped(entity);
+        }
+
+        public static OwnershipComponent GetOrAddOwnershipComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipComponentPool;
+            if (pool.HasTyped(entity))
+            {
+                return pool.GetTyped(entity);
+            }
+            return pool.AddTyped(entity);
+        }
+
+        public static bool HasOwnershipComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipComponentPool;
+            return pool.HasTyped(entity);
+        }
+
+        public static void SetOwnershipComponent(this VenusEntity entity, OwnershipComponent component)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipComponentPool;
+            pool.SetTyped(entity, component);
+        }
+
+        public static OwnershipRequestComponent AddOwnershipRequestComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipRequestComponentPool;
+            return pool.AddTyped(entity);
+        }
+
+        public static void DelOwnershipRequestComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipRequestComponentPool;
+            pool.RemoveTyped(entity);
+        }
+
+        public static void DelIfExistsOwnershipRequestComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipRequestComponentPool;
+            if (pool.HasTyped(entity))
+            {
+                pool.RemoveTyped(entity);
+            }
+        }
+
+        public static OwnershipRequestComponent GetOwnershipRequestComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipRequestComponentPool;
+            return pool.GetTyped(entity);
+        }
+
+        public static OwnershipRequestComponent GetOrAddOwnershipRequestComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipRequestComponentPool;
+            if (pool.HasTyped(entity))
+            {
+                return pool.GetTyped(entity);
+            }
+            return pool.AddTyped(entity);
+        }
+
+        public static bool HasOwnershipRequestComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipRequestComponentPool;
+            return pool.HasTyped(entity);
+        }
+
+        public static void SetOwnershipRequestComponent(this VenusEntity entity, OwnershipRequestComponent component)
+        {
+            var pool = ((VenusPools)Venus.Pools).OwnershipRequestComponentPool;
+            pool.SetTyped(entity, component);
+        }
+
+        public static InputRecieverComponent AddInputRecieverComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).InputRecieverComponentPool;
+            return pool.AddTyped(entity);
+        }
+
+        public static void DelInputRecieverComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).InputRecieverComponentPool;
+            pool.RemoveTyped(entity);
+        }
+
+        public static void DelIfExistsInputRecieverComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).InputRecieverComponentPool;
+            if (pool.HasTyped(entity))
+            {
+                pool.RemoveTyped(entity);
+            }
+        }
+
+        public static InputRecieverComponent GetInputRecieverComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).InputRecieverComponentPool;
+            return pool.GetTyped(entity);
+        }
+
+        public static InputRecieverComponent GetOrAddInputRecieverComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).InputRecieverComponentPool;
+            if (pool.HasTyped(entity))
+            {
+                return pool.GetTyped(entity);
+            }
+            return pool.AddTyped(entity);
+        }
+
+        public static bool HasInputRecieverComponent(this VenusEntity entity)
+        {
+            var pool = ((VenusPools)Venus.Pools).InputRecieverComponentPool;
+            return pool.HasTyped(entity);
+        }
+
+        public static void SetInputRecieverComponent(this VenusEntity entity, InputRecieverComponent component)
+        {
+            var pool = ((VenusPools)Venus.Pools).InputRecieverComponentPool;
             pool.SetTyped(entity, component);
         }
 

@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using VenusECS.Core.Exceptions;
+using VenusECS.Core.Reflection;
 
 namespace VenusECS.Core
 {
     public sealed class VenusModule
     {
         private IVenusModuleUpdateResolver _enableTickModuleCheck;
-
+        private DependencyInjector _dependencyInjector;
         private List<IVenusInitSystem> _initSystems = new();
         private List<IVenusTickSystem> _tickSystems = new();
         private List<IVenusDisposeSystem> _disposeSystems = new();
@@ -18,15 +20,29 @@ namespace VenusECS.Core
             bool Check();
         }
 
-        public static VenusModule Create(IVenusModuleUpdateResolver enableTickModuleCheck = null)
-        {
-            var module = new VenusModule(enableTickModuleCheck);
-            return module;
-        }
-
         public VenusModule(IVenusModuleUpdateResolver enableTickModuleCheck = null)
         {
             _enableTickModuleCheck = enableTickModuleCheck;
+        }
+
+        public void SetDependencyInjector(DependencyInjector dependencyInjector)
+        {
+            _dependencyInjector = dependencyInjector;
+        }
+
+        public void SetResolver(IVenusModuleUpdateResolver enableTickModuleCheck)
+        {
+            _enableTickModuleCheck = enableTickModuleCheck;
+        }
+
+        public VenusModule AddService(Type type, object instance)
+        {
+            if (_dependencyInjector == null)
+            {
+                _dependencyInjector = new DependencyInjector();
+            }
+            _dependencyInjector.AddService(type, instance);
+            return this;
         }
 
         public VenusModule AddSystem(IVenusSystem system)
@@ -45,6 +61,11 @@ namespace VenusECS.Core
                 _disposeSystems.Add(disposeSystem);
             }
 
+            if (_dependencyInjector != null)
+            {
+                _dependencyInjector.InjectDependencies(system);
+            }
+            
             return this;
         }
         

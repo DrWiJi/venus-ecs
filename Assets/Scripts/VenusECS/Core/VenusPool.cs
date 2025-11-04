@@ -26,6 +26,7 @@ namespace VenusECS.Core.Pool
         public int MaxEntityId => _maxEntityId;
         public int Length => _maxEntityId >= _minEntityId ? _maxEntityId - _minEntityId + 1 : 0;
         public int BitsPerInt => _bitsPerInt;
+        public int PoolIndex;
 
         public event Action<IVenusPool, VenusEntity> OnEntityAdded;
         public event Action<IVenusPool, VenusEntity> OnEntityRemoved;

@@ -45,6 +45,11 @@ namespace VenusECS.Core
             return SecondaryPools.Count - 1;
         }
 
+        public static void RemoveSecondaryPool(int index)
+        {
+            SecondaryPools.RemoveAt(index);
+        }
+
         public static void SwitchSecondaryPool(int index)
         {
             CurrentSecondaryPoolIndex = index;

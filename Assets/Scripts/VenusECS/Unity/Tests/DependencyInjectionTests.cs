@@ -44,8 +44,8 @@ namespace VenusECS.Unity.Tests
 
     internal class TestInjectionTarget
     {
-        [Inject] private readonly DynamicInstanceDependency _dynamicInstance;
-        [Inject] private readonly InstanceDependency _regularInstance;
+        [VenusInject] private readonly DynamicInstanceDependency _dynamicInstance;
+        [VenusInject] private readonly InstanceDependency _regularInstance;
 
         public DynamicInstanceDependency GetDynamic()
         {

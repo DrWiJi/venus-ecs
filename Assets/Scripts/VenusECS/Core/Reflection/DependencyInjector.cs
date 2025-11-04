@@ -26,7 +26,7 @@ namespace VenusECS.Core.Reflection
         {
             var targetType = target.GetType();
             var diFields = targetType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                .Select(f => f.GetCustomAttributes(typeof(InjectAttribute), true).Length > 0 ? f : null).ToList();
+                .Select(f => f.GetCustomAttributes(typeof(VenusInjectAttribute), true).Length > 0 ? f : null).ToList();
             foreach (var field in diFields)
             {
                 if (field == null) continue;

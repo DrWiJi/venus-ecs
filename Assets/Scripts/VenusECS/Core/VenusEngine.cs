@@ -8,11 +8,14 @@ namespace VenusECS.Core
         private HashSet<VenusModule> _disposedModules = new();
         private HashSet<VenusModule> _modules = new();
 
-        public static VenusEngine Create()
+        public VenusEngine(IEnumerable<VenusModule> modules)
         {
-            return new VenusEngine();
+            foreach (var module in modules)
+            {
+                AddModule(module);
+            }
         }
-        
+
         public VenusEngine AddModule(VenusModule module)
         {
             _modules.Add(module);
