@@ -14,7 +14,9 @@ namespace VenusECS.Core
         {
             Add,
             Remove,
-            Change
+            Change,
+            CreateEntity,
+            DeleteEntity
         }
         [Key(0)]
         public EAction Action;
@@ -30,6 +32,7 @@ namespace VenusECS.Core
 
     public abstract class VenusPoolsBase : IVenusPools
     {
+        public int WorldIndex { get; set; }
         private const int SnapshotVersion = 1;
         protected readonly Dictionary<Type, IVenusPool> _pools = new();
         protected IVenusPool[] _poolsArray;
@@ -43,6 +46,12 @@ namespace VenusECS.Core
         protected int _deltaPortionsCounter = 0;
         protected byte[] _deltaPortionsData = new byte[1024];
         protected int _deltaPortionsDataCounter = 0;
+
+        public event Action<VenusEntity> OnEntityCreated;
+        public event Action<VenusEntity> OnEntityDeleted;
+        public event Action<int, VenusEntity> OnEntityCreatedExternally;
+        public event Action<int, VenusEntity> OnEntityDeletedExternally;
+        public IEnumerable<VenusEntity> Entities => _entities;
 
         public VenusPoolsBase(int capacity)
         {
@@ -108,14 +117,33 @@ namespace VenusECS.Core
                 var entity = new VenusEntity { Id = _entitiesCounter++ };
                 _entities.Add(entity);
                 _usedPools.Add(entity, new HashSet<IVenusPool>(64));
+                OnEntityCreated?.Invoke(entity);
+                _deltaPortions[_deltaPortionsCounter].Action = PoolsDeltaPortion.EAction.CreateEntity;
+                _deltaPortions[_deltaPortionsCounter].Entity = entity;
+                _deltaPortions[_deltaPortionsCounter].PoolIndex = -1;
+                _deltaPortions[_deltaPortionsCounter].DataStartIndex = -1;
+                _deltaPortions[_deltaPortionsCounter].DataLength = 0;
+                _deltaPortionsCounter++;
                 return entity;
             }
             else
             {
                 var entity = _freeEntities.Dequeue();
                 _entities.Add(entity);
+                OnEntityCreated?.Invoke(entity);
+                _deltaPortions[_deltaPortionsCounter].Action = PoolsDeltaPortion.EAction.CreateEntity;
+                _deltaPortions[_deltaPortionsCounter].Entity = entity;
+                _deltaPortions[_deltaPortionsCounter].PoolIndex = -1;
+                _deltaPortions[_deltaPortionsCounter].DataStartIndex = -1;
+                _deltaPortions[_deltaPortionsCounter].DataLength = 0;
+                _deltaPortionsCounter++;
                 return entity;
             }
+        }
+
+        public int GetEntityComponentsCount(VenusEntity entity)
+        {
+            return _usedPools[entity].Count;
         }
 
         public void DeleteEntity(VenusEntity entity)
@@ -124,6 +152,13 @@ namespace VenusECS.Core
             _usedPools[entity].Clear();
             _entities.Remove(entity);
             _freeEntities.Enqueue(entity);
+            OnEntityDeleted?.Invoke(entity);
+            _deltaPortions[_deltaPortionsCounter].Action = PoolsDeltaPortion.EAction.DeleteEntity;
+            _deltaPortions[_deltaPortionsCounter].Entity = entity;
+            _deltaPortions[_deltaPortionsCounter].PoolIndex = -1;
+            _deltaPortions[_deltaPortionsCounter].DataStartIndex = -1;
+            _deltaPortions[_deltaPortionsCounter].DataLength = 0;
+            _deltaPortionsCounter++;
         }
 
         public virtual void Clear()
@@ -187,6 +222,12 @@ namespace VenusECS.Core
                                 _poolsArray[deltaPortions[i].PoolIndex].SetRaw(deltaPortions[i].Entity, ptr);
                             }
                         }
+                        break;
+                    case PoolsDeltaPortion.EAction.CreateEntity:
+                        OnEntityCreatedExternally?.Invoke(WorldIndex, deltaPortions[i].Entity);
+                        break;
+                    case PoolsDeltaPortion.EAction.DeleteEntity:
+                        OnEntityDeletedExternally?.Invoke(WorldIndex, deltaPortions[i].Entity);
                         break;
                 }
             }

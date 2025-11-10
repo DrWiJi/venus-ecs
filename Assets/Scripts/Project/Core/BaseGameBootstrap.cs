@@ -6,10 +6,13 @@ using Project.Services.NetTransportService;
 using System.Collections.Generic;
 using VenusECS.Core;
 using static Project.Services.VenusNetService.VenusNetService;
+using Project.Core.Gameplay.Systems;
+using VContainer;
+using Project.Services.Input;
 
 namespace Project.Core
 {
-    public class BaseGameBootstrap : MonoBehaviour, IVenusNetWorldsSynchronator
+    public abstract class BaseGameBootstrap : MonoBehaviour, IVenusNetWorldsSynchronator
     {
         public event Action OnServerSnapshotNeeded;
         public event Action<long> OnDeltaReady;
@@ -40,14 +43,19 @@ namespace Project.Core
             _venusReplicationEngine = new VenusEngine(new VenusModule[] {
                 _replicationModule,
             });
+            OnAwake();
         }
+
+        protected abstract void OnAwake();
 
         private void Start()
         {
+            OnStart();
             _venusFixedLogicEngine.InitEngine();
             _venusViewLogicEngine.InitEngine();
             _venusReplicationEngine.InitEngine();
         }
+        protected abstract void OnStart();
 
         private void Update()
         {
@@ -58,15 +66,20 @@ namespace Project.Core
                 _venusReplicationEngine.Tick();
             }
             _venusViewLogicEngine.Tick();
+            OnUpdate();
         }
+
+        protected abstract void OnUpdate();
 
         private void FixedUpdate()
         {
             DequeueDelta();
             _venusFixedLogicEngine.Tick();
+            OnFixedUpdate();
             OnDeltaReady?.Invoke(_localSimulationFrame);
             _localSimulationFrame++;
         }
+        protected abstract void OnFixedUpdate();
 
         private void DequeueDelta()
         {
@@ -167,6 +180,73 @@ namespace Project.Core
             _venusFixedLogicEngine.DisposeEngine();
             _venusViewLogicEngine.DisposeEngine();
             _venusReplicationEngine.DisposeEngine();
+            OnDestroyed();
+        }
+
+        protected abstract void OnDestroyed();
+    }
+
+    public class ClientGameBootstrap : BaseGameBootstrap
+    {
+        protected override void OnAwake()
+        {
+            _gameFixedLogicModule
+            .AddSystem(new InputReaderSystem())
+            
+            ;
+        }
+
+        [Inject]
+        private void InjectDependencies(InputService inputService)
+        {
+            _gameFixedLogicModule.AddService(typeof(InputService), inputService);
+        }
+
+        protected override void OnFixedUpdate()
+        {
+        }
+
+        protected override void OnStart()
+        {
+        }
+
+        protected override void OnUpdate()
+        {
+            
+        }
+
+        protected override void OnDestroyed()
+        {
+        }
+    }
+
+    public class ServerGameBootstrap : BaseGameBootstrap
+    {
+        protected override void OnAwake()
+        {
+        }
+
+        [Inject]
+        private void InjectDependencies()
+        {
+
+
+        }
+
+        protected override void OnFixedUpdate()
+        {
+        }
+
+        protected override void OnStart()
+        {
+        }
+
+        protected override void OnUpdate()
+        {
+        }
+
+        protected override void OnDestroyed()
+        {
         }
     }
 }

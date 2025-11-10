@@ -12,7 +12,12 @@ namespace VenusECS.Unity.Extensions
 
         public static T GetSecondary<T>(this VenusEntity entity) where T: struct, IVenusComponent
         {
-            return Venus.SecondaryPools[Venus.CurrentSecondaryPoolIndex].GetPool<T>().Get<T>(entity);
+            if(!Venus.PrimaryWorldEntityToSecondaryWorldEntity[Venus.CurrentSecondaryPoolIndex].ContainsKey(entity))
+            {
+                throw new ArgumentException($"Entity {entity.Id} is not in the secondary world");
+            }
+            var secondaryEntity = Venus.PrimaryWorldEntityToSecondaryWorldEntity[Venus.CurrentSecondaryPoolIndex][entity];
+            return Venus.SecondaryPools[Venus.CurrentSecondaryPoolIndex].GetPool<T>().Get<T>(secondaryEntity);
         }
 
         public static void Set<T>(this VenusEntity entity, T component) where T: struct, IVenusComponent
@@ -53,7 +58,12 @@ namespace VenusECS.Unity.Extensions
 
         public static bool HasSecondary<T>(this VenusEntity entity) where T : struct, IVenusComponent
         {
-            return Venus.SecondaryPools[Venus.CurrentSecondaryPoolIndex].GetPool<T>().Has<T>(entity);
+            if(!Venus.PrimaryWorldEntityToSecondaryWorldEntity[Venus.CurrentSecondaryPoolIndex].ContainsKey(entity))
+            {
+                return false;
+            }
+            var secondaryEntity = Venus.PrimaryWorldEntityToSecondaryWorldEntity[Venus.CurrentSecondaryPoolIndex][entity];
+            return Venus.SecondaryPools[Venus.CurrentSecondaryPoolIndex].GetPool<T>().Has<T>(secondaryEntity);
         }
 
         public static void Remove<T>(this VenusEntity entity) where T : struct, IVenusComponent

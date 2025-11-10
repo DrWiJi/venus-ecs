@@ -5,6 +5,13 @@ namespace VenusECS.Core.Pool
 {
     public interface IVenusPools
     {
+        int WorldIndex { get; set;}
+        event Action<VenusEntity> OnEntityCreated;
+        event Action<VenusEntity> OnEntityDeleted;
+        event Action<int, VenusEntity> OnEntityCreatedExternally;
+        event Action<int, VenusEntity> OnEntityDeletedExternally;
+        IEnumerable<VenusEntity> Entities { get; }
+        int GetEntityComponentsCount(VenusEntity entity);
         IVenusPool GetPool<T1>() where T1 : struct, IVenusComponent;
         IVenusPool GetPool(int index);
         VenusEntity CreateEntity();

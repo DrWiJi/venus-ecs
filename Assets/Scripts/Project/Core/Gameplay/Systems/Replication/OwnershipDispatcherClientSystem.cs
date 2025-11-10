@@ -14,12 +14,12 @@ namespace Project.Core.Gameplay.Systems.Replication
         {
             foreach (var entity in _ownershipRequestFilter)
             {
-                if(entity.HasSecondary<OwnershipComponent>())
+                if (entity.HasSecondary<OwnershipComponent>())
                 {
                     var ownershipComponent = entity.GetSecondary<OwnershipComponent>();
-                    entity.SetOwnershipComponent(ownershipComponent);
+                    entity.AddOwnershipComponent(ownershipComponent);
                     entity.DelOwnershipRequestComponent();
-                }                
+                }
             }
         }
     }

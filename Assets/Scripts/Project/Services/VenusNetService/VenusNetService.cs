@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Linq;
+using VenusECS.Core;
 
 namespace Project.Services.VenusNetService
 {
@@ -23,6 +24,8 @@ namespace Project.Services.VenusNetService
         private List<NetTransportPeer> _peers = new(10);
         private IVenusNetWorldsSynchronator _venusNetWorldsSynchronator;
         private Dictionary<NetTransportPeer, CancellationTokenSource> _clientWelcomeCtsByPeerId = new(10);
+        private int _clientId = 0;
+
 
         [Inject]
         public VenusNetService(INetTransport netTransportService, IVenusNetWorldsSynchronator venusNetWorldsSynchronator)
@@ -152,6 +155,10 @@ namespace Project.Services.VenusNetService
                     var serverSnapshotPayload = new NetDataPayload();
                     serverSnapshotPayload.SetData(_venusNetWorldsSynchronator.GetWorld(sender).GetSnapshot(), (int)NetMessageTypes.WorldSnapshot);
                     _netTransportService.SendMessageToPeer(sender, serverSnapshotPayload);
+                    //Send client id to the server
+                    var clientIdPayload = new NetDataPayload();
+                    clientIdPayload.SetData(BitConverter.GetBytes(sender.Id), (int)NetMessageTypes.ClientId);
+                    _netTransportService.SendMessageToPeer(sender, clientIdPayload);
                     break;
                 case (int)NetMessageTypes.ClientWelcome:
                     {
@@ -215,6 +222,13 @@ namespace Project.Services.VenusNetService
                         reqServerSnapshotPayload.SetData(snapshotWithHash, (int)NetMessageTypes.WorldSnapshot);
                         _netTransportService.SendMessageToPeer(sender, reqServerSnapshotPayload);
                     }
+                    break;
+                case (int)NetMessageTypes.ClientId:
+                    Debug.Log("ClientId received");
+                    //Deserialize the client id
+                    var clientId = BitConverter.ToInt32(payload.Data, 0);
+                    Debug.Log($"Client id: {clientId}");
+                    _clientId = clientId;
                     break;
                 default:
                     break;

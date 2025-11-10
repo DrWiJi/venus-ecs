@@ -23,6 +23,7 @@ namespace VenusECS.Unity
         public readonly VenusPool<OwnershipComponent> OwnershipComponentPool = new VenusPool<OwnershipComponent>();
         public readonly VenusPool<OwnershipRequestComponent> OwnershipRequestComponentPool = new VenusPool<OwnershipRequestComponent>();
         public readonly VenusPool<InputRecieverComponent> InputRecieverComponentPool = new VenusPool<InputRecieverComponent>();
+        public readonly VenusPool<LocalInputRecieverComponent> LocalInputRecieverComponentPool = new VenusPool<LocalInputRecieverComponent>();
 
 
         private void AddGenerated()
@@ -49,6 +50,8 @@ namespace VenusECS.Unity
             OwnershipRequestComponentPool.PoolIndex = 9;
             _pools.Add(typeof(InputRecieverComponent), InputRecieverComponentPool);
             InputRecieverComponentPool.PoolIndex = 10;
+            _pools.Add(typeof(LocalInputRecieverComponent), LocalInputRecieverComponentPool);
+            LocalInputRecieverComponentPool.PoolIndex = 11;
 
         }
     }

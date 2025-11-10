@@ -8,9 +8,10 @@ namespace Project.Services.VenusNetService
 		ServerWelcome = 3,
 		ClientWelcome = 4,
 		WorldSnapshot = 5,
-		WorldDelta = 6,
-		TimeSync = 7,
-		RequestServerSnapshot = 8,
+		ClientId = 6,
+		WorldDelta = 7,
+		TimeSync = 8,
+		RequestServerSnapshot = 9,
 	}
 }
 
